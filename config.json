@@ -12,7 +12,7 @@
       "data_dir": "data/",
       "batch_size": 128,
       "shuffle": true,
-      "validation_split": 0.1,
+      "validation_split": 0.2,
       "num_workers": 2
     }
   },
@@ -20,7 +20,7 @@
     "type": "Adam",
     "args": {
       "lr": 0.001,
-      "weight_decay": 0,
+      "weight_decay": 0.01,
       "amsgrad": true
     }
   },
@@ -36,7 +36,7 @@
   "trainer": {
     "epochs": 100,
     "save_dir": "saved/",
-    "save_period": 1,
+    "save_period": 5,
     "verbosity": 2,
 
     "monitor": "min val_loss",

@@ -60,7 +60,6 @@ class Trainer(BaseTrainer):
         total_loss = 0
         total_metrics = np.zeros(len(self.metrics))
         with self.experiment.train():
-            self.experiment.log_current_epoch(epoch)
             for batch_idx, (data, target) in enumerate(self.data_loader):
                 data, target = data.to(self.device), target.to(self.device)
 
@@ -91,6 +90,8 @@ class Trainer(BaseTrainer):
                 'loss': total_loss / len(self.data_loader),
                 'metrics': (total_metrics / len(self.data_loader)).tolist(),
             }
+
+            self.experiment.log_metric('epoch_loss', log['loss'], step=epoch)
 
             for i, m in enumerate(log['metrics']):
                 self.experiment.log_metric(f'metric_{i}', m, step=epoch)
@@ -126,10 +127,6 @@ class Trainer(BaseTrainer):
                 output = self.model(data)
                 loss = self.loss(output, target)
 
-                # self.writer.set_step(
-                #     (epoch - 1) * len(self.valid_data_loader) + batch_idx, 'valid'
-                # )
-                # self.writer.add_scalar('loss', loss.item())
                 total_val_loss += loss.item()
                 total_val_metrics += self._eval_metrics(output, target)
                 # fig = make_grid(data.cpu(), nrow=8, normalize=True)
@@ -144,6 +141,8 @@ class Trainer(BaseTrainer):
             'val_loss': total_val_loss / len(self.valid_data_loader),
             'val_metrics': (total_val_metrics / len(self.valid_data_loader)).tolist(),
         }
+
+        self.experiment.log_metric('epoch_loss', log['val_loss'], step=epoch)
 
         for i, m in enumerate(log['val_metrics']):
             self.experiment.log_metric(f'metric_{i}', m, step=epoch)
