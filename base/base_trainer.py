@@ -4,10 +4,11 @@ import json
 import logging
 import datetime
 import torch
+from abc import ABC, abstractmethod
 from utils.util import ensure_dir, flatten
 
 
-class BaseTrainer:
+class BaseTrainer(ABC):
     """Base class for all trainers."""
 
     def __init__(
@@ -96,11 +97,9 @@ class BaseTrainer:
             log = {'epoch': epoch}
             for key, value in result.items():
                 if key == 'metrics':
-                    log.update({mtr.__name__: value[i] for i, mtr in enumerate(self.metrics)})
+                    log.update({m.name: m.value for m in self.metrics})
                 elif key == 'val_metrics':
-                    log.update(
-                        {'val_' + mtr.__name__: value[i] for i, mtr in enumerate(self.metrics)}
-                    )
+                    log.update({'val_' + m.name: m.value for m in self.metrics})
                 else:
                     log[key] = value
 
@@ -147,21 +146,22 @@ class BaseTrainer:
             if epoch % self.save_period == 0:
                 self._save_checkpoint(epoch, save_best=best)
 
+    @abstractmethod
     def _train_epoch(self, epoch):
-        """
-        Training logic for an epoch
+        """Training logic for an epoch.
 
-        :param epoch: Current epoch number
+        Args:
+            epoch (int): current epoch number.
         """
-        raise NotImplementedError
+        pass
 
     def _save_checkpoint(self, epoch, save_best=False):
-        """
-        Saving checkpoints
+        """Saving checkpoints
 
-        :param epoch: current epoch number
-        :param log: logging information of the epoch
-        :param save_best: if True, rename the saved checkpoint to 'model_best.pth'
+        Args:
+            epoch (int): current epoch number
+            save_best (bool, optional): Defaults to False. if True, rename the saved checkpoint
+                to 'model_best.pth'
         """
         arch = type(self.model).__name__
         state = {
@@ -182,10 +182,10 @@ class BaseTrainer:
             self.logger.info("Saving current best: {} ...".format('model_best.pth'))
 
     def _resume_checkpoint(self, resume_path):
-        """
-        Resume from saved checkpoints
+        """Resume from saved checkpoints
 
-        :param resume_path: Checkpoint path to be resumed
+        Args:
+            resume_path (str): Checkpoint path to be resumed
         """
         self.logger.info("Loading checkpoint: {} ...".format(resume_path))
         checkpoint = torch.load(resume_path)

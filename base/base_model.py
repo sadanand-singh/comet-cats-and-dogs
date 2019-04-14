@@ -3,22 +3,20 @@ import torch.nn as nn
 import torch
 import numpy as np
 from collections import OrderedDict
+from abc import ABC, abstractmethod
 
 
-class BaseModel(nn.Module):
+class BaseModel(ABC, nn.Module):
     """Base class for all models."""
 
     def __init__(self):
         super(BaseModel, self).__init__()
         self.logger = logging.getLogger(self.__class__.__name__)
 
+    @abstractmethod
     def forward(self, *input):
-        """
-        Forward pass logic
-
-        :return: Model output
-        """
-        raise NotImplementedError
+        """Forward pass logic."""
+        pass
 
     def __str__(self):
         """prints with number of trainable parameters."""
@@ -27,9 +25,7 @@ class BaseModel(nn.Module):
         return super(BaseModel, self).__str__() + '\nTrainable parameters: {}'.format(params)
 
     def short_summary(self):
-        """
-        Model summary
-        """
+        """Model short summary."""
         model_parameters = filter(lambda p: p.requires_grad, self.parameters())
         params = sum([np.prod(p.size()) for p in model_parameters])
         print("Trainable parameters: {}".format(params))
@@ -37,7 +33,17 @@ class BaseModel(nn.Module):
         print(self)
         print("----------------------------------------------------------------")
 
-    def summary(self, input_size, batch_size=-1, device="cpu"):
+    def summary(self, input_size, batch_size=-1):
+        """model full summary.
+
+        Args:
+            input_size (tuple): shape of input.
+            batch_size (int, optional): Defaults to -1. batch size to use for summary.
+        """
+        device = 'cpu'
+        if next(self.parameters()).is_cuda:
+            device = 'cuda'
+
         def register_hook(module):
             def hook(module, input, output):
                 class_name = str(module.__class__).split(".")[-1].split("'")[0]
