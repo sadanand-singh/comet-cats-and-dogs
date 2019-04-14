@@ -3,8 +3,8 @@ from abc import ABC, abstractmethod
 
 
 class Metric(ABC):
-    def __init__(self):
-        self.name = self.__class__.__name__.lower()
+    def __init__(self, name=None):
+        self.name = self.__class__.__name__.lower() if name is None else name
         self.value = 0.0
 
     @abstractmethod
@@ -21,10 +21,10 @@ class Metric(ABC):
 
 
 class Accuracy(Metric):
-    def __init__(self):
+    def __init__(self, name=None):
         self.corrects = 0
         self.num_instances = 0
-        super().__init__()
+        super().__init__(name=name)
 
     def reset(self):
         self.corrects = 0
@@ -46,12 +46,11 @@ class Accuracy(Metric):
 
 
 class TopKAccuracy(Metric):
-    def __init__(self, k=3):
+    def __init__(self, name=None, k=3):
         self.corrects = 0
         self.k = k
         self.num_instances = 0
-        self.value = 0.0
-        super().__init__()
+        super().__init__(name=name)
 
     def reset(self):
         self.corrects = 0

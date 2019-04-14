@@ -25,7 +25,10 @@
     }
   },
   "loss": "nll_loss",
-  "metrics": ["Accuracy", "TopKAccuracy"],
+  "metrics": {
+    "Accuracy": { "name": "acc" },
+    "TopKAccuracy": { "k": 3, "name": "top3-acc" }
+  },
   "lr_scheduler": {
     "type": "StepLR",
     "args": {
