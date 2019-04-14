@@ -25,7 +25,7 @@
     }
   },
   "loss": "nll_loss",
-  "metrics": ["my_metric", "my_metric2"],
+  "metrics": ["Accuracy", "TopKAccuracy"],
   "lr_scheduler": {
     "type": "StepLR",
     "args": {
