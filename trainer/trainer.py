@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 from base import BaseTrainer
+from tqdm import tqdm
 
 
 class Trainer(BaseTrainer):
@@ -22,9 +23,10 @@ class Trainer(BaseTrainer):
         valid_data_loader=None,
         lr_scheduler=None,
         train_logger=None,
+        comet_exp=None,
     ):
         super(Trainer, self).__init__(
-            model, loss, metrics, optimizer, resume, config, train_logger
+            model, loss, metrics, optimizer, resume, config, train_logger, comet_exp
         )
         self.config = config
         self.data_loader = data_loader
@@ -60,7 +62,7 @@ class Trainer(BaseTrainer):
         total_loss = 0
         total_metrics = np.zeros(len(self.metrics))
         with self.experiment.train():
-            for batch_idx, (data, target) in enumerate(self.data_loader):
+            for batch_idx, (data, target) in enumerate(tqdm(self.data_loader)):
                 data, target = data.to(self.device), target.to(self.device)
 
                 self.optimizer.zero_grad()

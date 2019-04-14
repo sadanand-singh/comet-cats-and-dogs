@@ -1,4 +1,3 @@
-from comet_ml import Experiment
 import os
 import math
 import json
@@ -11,9 +10,11 @@ from utils.util import ensure_dir, flatten
 class BaseTrainer:
     """Base class for all trainers."""
 
-    def __init__(self, model, loss, metrics, optimizer, resume, config, train_logger=None):
+    def __init__(
+        self, model, loss, metrics, optimizer, resume, config, train_logger=None, comet_exp=None
+    ):
         self.config = config
-        self.experiment = Experiment(project_name=self.config['name'])
+        self.experiment = comet_exp
         self.experiment.log_parameters(flatten(self.config, sep='.'))
         self.logger = logging.getLogger(self.__class__.__name__)
 

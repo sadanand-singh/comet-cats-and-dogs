@@ -47,6 +47,7 @@ def main(config, resume):
         valid_data_loader=valid_data_loader,
         lr_scheduler=lr_scheduler,
         train_logger=train_logger,
+        comet_exp=Experiment(project_name=config['name']),
     )
 
     trainer.train()
