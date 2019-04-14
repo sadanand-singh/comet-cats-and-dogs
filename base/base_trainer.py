@@ -14,7 +14,7 @@ class BaseTrainer:
     def __init__(self, model, loss, metrics, optimizer, resume, config, train_logger=None):
         self.config = config
         self.experiment = Experiment(project_name=self.config['name'])
-        self.experiment.log_parameters(flatten(self.config))
+        self.experiment.log_parameters(flatten(self.config, sep='.'))
         self.logger = logging.getLogger(self.__class__.__name__)
 
         # setup GPU device if available, move model into configured device
