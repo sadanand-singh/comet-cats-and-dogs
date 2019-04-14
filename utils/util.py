@@ -1,5 +1,11 @@
 import os
 import collections
+import contextlib
+
+
+@contextlib.contextmanager
+def dummy_context_mgr():
+    yield None
 
 
 def flatten(d, parent_key='', sep='_'):

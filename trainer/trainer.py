@@ -2,12 +2,7 @@ import numpy as np
 import torch
 from base import BaseTrainer
 from tqdm import tqdm
-import contextlib
-
-
-@contextlib.contextmanager
-def dummy_context_mgr():
-    yield None
+from utils.util import dummy_context_mgr
 
 
 class Trainer(BaseTrainer):
