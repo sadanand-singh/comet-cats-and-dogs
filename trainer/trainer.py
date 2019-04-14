@@ -5,8 +5,7 @@ from base import BaseTrainer
 
 
 class Trainer(BaseTrainer):
-    """
-    Trainer class
+    """Trainer class.
 
     Note:
         Inherited from BaseTrainer.

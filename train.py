@@ -29,7 +29,8 @@ def main(config, resume):
     loss = getattr(module_loss, config['loss'])
     metrics = [getattr(module_metric, met) for met in config['metrics']]
 
-    # build optimizer, learning rate scheduler. delete every lines containing lr_scheduler for disabling scheduler
+    # build optimizer, learning rate scheduler. delete every lines containing lr_scheduler for
+    # disabling scheduler
     trainable_params = filter(lambda p: p.requires_grad, model.parameters())
     optimizer = get_instance(torch.optim, 'optimizer', config, trainable_params)
     lr_scheduler = get_instance(torch.optim.lr_scheduler, 'lr_scheduler', config, optimizer)
@@ -72,7 +73,8 @@ if __name__ == '__main__':
 
     elif args.resume:
         # load config from checkpoint if new config file is not given.
-        # Use '--config' and '--resume' together to fine-tune trained model with changed configurations.
+        # Use '--config' and '--resume' together to fine-tune trained model with changed
+        # configurations.
         config = torch.load(args.resume)['config']
 
     else:
