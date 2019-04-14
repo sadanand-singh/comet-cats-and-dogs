@@ -1,7 +1,6 @@
 {
   "name": "MNIST",
-  "n_gpu": 0,
-
+  "n_gpu": 1,
   "arch": {
     "type": "MnistModel",
     "args": {}
