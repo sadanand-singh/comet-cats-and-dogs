@@ -2,6 +2,12 @@ import numpy as np
 import torch
 from base import BaseTrainer
 from tqdm import tqdm
+import contextlib
+
+
+@contextlib.contextmanager
+def dummy_context_mgr():
+    yield None
 
 
 class Trainer(BaseTrainer):
@@ -61,7 +67,7 @@ class Trainer(BaseTrainer):
 
         total_loss = 0
         total_metrics = np.zeros(len(self.metrics))
-        with self.experiment.train():
+        with self.experiment.train() if self.experiment is not None else dummy_context_mgr():
             for batch_idx, (data, target) in enumerate(tqdm(self.data_loader)):
                 data, target = data.to(self.device), target.to(self.device)
 
@@ -92,21 +98,21 @@ class Trainer(BaseTrainer):
                 'loss': total_loss / len(self.data_loader),
                 'metrics': (total_metrics / len(self.data_loader)).tolist(),
             }
-
-            self.experiment.log_metric('epoch_loss', log['loss'], step=epoch)
-
-            for i, m in enumerate(log['metrics']):
-                self.experiment.log_metric(f'metric_{i}', m, step=epoch)
+            if self.experiment is not None:
+                self.experiment.log_metric('epoch_loss', log['loss'], step=epoch)
+                for i, m in enumerate(log['metrics']):
+                    self.experiment.log_metric(f'metric_{i}', m, step=epoch)
 
         if self.do_validation:
-            with self.experiment.test():
+            with self.experiment.test() if self.experiment is not None else dummy_context_mgr():
                 val_log = self._valid_epoch(epoch)
             log = {**log, **val_log}
 
         if self.lr_scheduler is not None:
             self.lr_scheduler.step()
 
-        self.experiment.log_epoch_end(self, epoch)
+        if self.experiment is not None:
+            self.experiment.log_epoch_end(self, epoch)
 
         return log
 
@@ -144,9 +150,9 @@ class Trainer(BaseTrainer):
             'val_metrics': (total_val_metrics / len(self.valid_data_loader)).tolist(),
         }
 
-        self.experiment.log_metric('epoch_loss', log['val_loss'], step=epoch)
-
-        for i, m in enumerate(log['val_metrics']):
-            self.experiment.log_metric(f'metric_{i}', m, step=epoch)
+        if self.experiment is not None:
+            self.experiment.log_metric('epoch_loss', log['val_loss'], step=epoch)
+            for i, m in enumerate(log['val_metrics']):
+                self.experiment.log_metric(f'metric_{i}', m, step=epoch)
 
         return log

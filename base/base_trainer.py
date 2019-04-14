@@ -14,14 +14,20 @@ class BaseTrainer:
         self, model, loss, metrics, optimizer, resume, config, train_logger=None, comet_exp=None
     ):
         self.config = config
+
         self.experiment = comet_exp
-        self.experiment.log_parameters(flatten(self.config, sep='.'))
+        if self.experiment is not None:
+            self.experiment.log_parameters(flatten(self.config, sep='.'))
+
         self.logger = logging.getLogger(self.__class__.__name__)
 
         # setup GPU device if available, move model into configured device
         self.device, device_ids = self._prepare_device(config['n_gpu'])
         self.model = model.to(self.device)
-        self.experiment.set_model_graph(str(self.model))
+
+        if self.experiment is not None:
+            self.experiment.set_model_graph(str(self.model))
+
         if len(device_ids) > 1:
             self.model = torch.nn.DataParallel(model, device_ids=device_ids)
 
