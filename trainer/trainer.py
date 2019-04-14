@@ -36,12 +36,6 @@ class Trainer(BaseTrainer):
         self.lr_scheduler = lr_scheduler
         self.log_step = int(np.sqrt(data_loader.batch_size))
 
-    def _eval_metrics(self, output, target):
-        acc_metrics = np.zeros(len(self.metrics))
-        for i, metric in enumerate(self.metrics):
-            acc_metrics[i] += metric(output, target)
-        return acc_metrics
-
     def _train_epoch(self, epoch):
         """
         Training logic for an epoch
@@ -61,7 +55,6 @@ class Trainer(BaseTrainer):
         self.model.train()
 
         total_loss = 0
-        total_metrics = np.zeros(len(self.metrics))
         with self.experiment.train() if self.experiment is not None else dummy_context_mgr():
             for batch_idx, (data, target) in enumerate(tqdm(self.data_loader)):
                 data, target = data.to(self.device), target.to(self.device)
@@ -73,7 +66,9 @@ class Trainer(BaseTrainer):
                 self.optimizer.step()
 
                 total_loss += loss.item()
-                total_metrics += self._eval_metrics(output, target)
+
+                for metric in self.metrics:
+                    metric.update(output, target)
 
                 if self.verbosity >= 2 and batch_idx % self.log_step == 0:
                     self.logger.info(
@@ -89,14 +84,15 @@ class Trainer(BaseTrainer):
                     # plt.imshow(np.transpose(fig.numpy(), (1, 2, 0)), interpolation='nearest')
                     # self.experiment.log_figure('input')
 
-            log = {
-                'loss': total_loss / len(self.data_loader),
-                'metrics': (total_metrics / len(self.data_loader)).tolist(),
-            }
+            # finalize metrics
+            for metric in self.metrics:
+                metric.eval()
+
+            log = {'loss': total_loss / len(self.data_loader), 'metrics': []}
             if self.experiment is not None:
                 self.experiment.log_metric('epoch_loss', log['loss'], step=epoch)
-                for i, m in enumerate(log['metrics']):
-                    self.experiment.log_metric(f'metric_{i}', m, step=epoch)
+                for m in self.metrics:
+                    self.experiment.log_metric(m.name, m.value, step=epoch)
 
         if self.do_validation:
             with self.experiment.test() if self.experiment is not None else dummy_context_mgr():
@@ -122,7 +118,7 @@ class Trainer(BaseTrainer):
         """
         self.model.eval()
         total_val_loss = 0
-        total_val_metrics = np.zeros(len(self.metrics))
+
         with torch.no_grad():
             for batch_idx, (data, target) in enumerate(self.valid_data_loader):
                 data, target = data.to(self.device), target.to(self.device)
@@ -131,7 +127,9 @@ class Trainer(BaseTrainer):
                 loss = self.loss(output, target)
 
                 total_val_loss += loss.item()
-                total_val_metrics += self._eval_metrics(output, target)
+
+                for metric in self.metrics:
+                    metric.update(output, target)
                 # fig = make_grid(data.cpu(), nrow=8, normalize=True)
                 # plt.imshow(np.transpose(fig.numpy(), (1, 2, 0)), interpolation='nearest')
                 # self.experiment.log_figure('input')
@@ -139,15 +137,15 @@ class Trainer(BaseTrainer):
         # add histogram of model parameters to the tensorboard
         # for name, p in self.model.named_parameters():
         #     self.writer.add_histogram(name, p, bins='auto')
+        # finalize metrics
+        for metric in self.metrics:
+            metric.eval()
 
-        log = {
-            'val_loss': total_val_loss / len(self.valid_data_loader),
-            'val_metrics': (total_val_metrics / len(self.valid_data_loader)).tolist(),
-        }
+        log = {'val_loss': total_val_loss / len(self.valid_data_loader), 'val_metrics': []}
 
         if self.experiment is not None:
             self.experiment.log_metric('epoch_loss', log['val_loss'], step=epoch)
-            for i, m in enumerate(log['val_metrics']):
-                self.experiment.log_metric(f'metric_{i}', m, step=epoch)
+            for m in self.metrics:
+                self.experiment.log_metric(m.name, m.value, step=epoch)
 
         return log

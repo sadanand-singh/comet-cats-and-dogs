@@ -28,7 +28,7 @@ def main(config, resume):
 
     # get function handles of loss and metrics
     loss = getattr(module_loss, config['loss'])
-    metrics = [getattr(module_metric, met) for met in config['metrics']]
+    metrics = [getattr(module_metric, met)() for met in config['metrics']]
 
     # build optimizer, learning rate scheduler. delete every lines containing lr_scheduler for
     # disabling scheduler
