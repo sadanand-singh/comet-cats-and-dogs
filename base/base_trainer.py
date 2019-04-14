@@ -1,10 +1,11 @@
+from comet_ml import Experiment
 import os
 import math
 import json
 import logging
 import datetime
 import torch
-from utils.util import ensure_dir
+from utils.util import ensure_dir, flatten
 
 
 class BaseTrainer:
@@ -12,11 +13,14 @@ class BaseTrainer:
 
     def __init__(self, model, loss, metrics, optimizer, resume, config, train_logger=None):
         self.config = config
+        self.experiment = Experiment(project_name=self.config['name'])
+        self.experiment.log_parameters(flatten(self.config))
         self.logger = logging.getLogger(self.__class__.__name__)
 
         # setup GPU device if available, move model into configured device
         self.device, device_ids = self._prepare_device(config['n_gpu'])
         self.model = model.to(self.device)
+        self.experiment.set_model_graph(str(self.model))
         if len(device_ids) > 1:
             self.model = torch.nn.DataParallel(model, device_ids=device_ids)
 
@@ -68,7 +72,7 @@ class BaseTrainer:
             n_gpu_use = 0
         if n_gpu_use > n_gpu:
             self.logger.warning(
-                "Warning: The number of GPU\'s configured to use is {}, but only {} are available "
+                "Warning: The number of GPUs configured to use is {}, but only {} are available "
                 "on this machine.".format(n_gpu_use, n_gpu)
             )
             n_gpu_use = n_gpu
