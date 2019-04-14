@@ -1,6 +1,7 @@
 {
   "name": "MNIST",
   "n_gpu": 1,
+  "comet": false,
   "arch": {
     "type": "MnistModel",
     "args": {}
@@ -24,10 +25,7 @@
     }
   },
   "loss": "nll_loss",
-  "metrics": [
-    "my_metric",
-    "my_metric2"
-  ],
+  "metrics": ["my_metric", "my_metric2"],
   "lr_scheduler": {
     "type": "StepLR",
     "args": {

@@ -35,6 +35,7 @@ def main(config, resume):
     trainable_params = filter(lambda p: p.requires_grad, model.parameters())
     optimizer = get_instance(torch.optim, 'optimizer', config, trainable_params)
     lr_scheduler = get_instance(torch.optim.lr_scheduler, 'lr_scheduler', config, optimizer)
+    comet_exp = Experiment(project_name=config['name']) if config['comet'] else None
 
     trainer = Trainer(
         model,
@@ -47,7 +48,7 @@ def main(config, resume):
         valid_data_loader=valid_data_loader,
         lr_scheduler=lr_scheduler,
         train_logger=train_logger,
-        comet_exp=Experiment(project_name=config['name']),
+        comet_exp=comet_exp,
     )
 
     trainer.train()
