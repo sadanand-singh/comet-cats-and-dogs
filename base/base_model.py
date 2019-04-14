@@ -20,6 +20,12 @@ class BaseModel(nn.Module):
         """
         raise NotImplementedError
 
+    def __str__(self):
+        """prints with number of trainable parameters."""
+        model_parameters = filter(lambda p: p.requires_grad, self.parameters())
+        params = sum([np.prod(p.size()) for p in model_parameters])
+        return super(BaseModel, self).__str__() + '\nTrainable parameters: {}'.format(params)
+
     def short_summary(self):
         """
         Model summary
