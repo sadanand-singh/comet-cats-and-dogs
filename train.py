@@ -19,12 +19,15 @@ def main(config, resume):
     train_logger = Logger()
 
     # setup data_loader instances
-    data_loader = get_instance(module_data, 'data_loader', config)
-    valid_data_loader = data_loader.split_validation()
+    data_loader = get_instance(module_data, 'train_data_loader', config)
+    valid_data_loader = get_instance(module_data, 'val_data_loader', config)
 
     # build model architecture
     model = get_instance(module_arch, 'arch', config)
-    print(model)
+    model.summary(
+        input_size=tuple(config["arch"]["input_shape"]),
+        batch_size=config["data_loader"]["args"]["batch_size"],
+    )
 
     # get function handles of loss and metrics
     loss = getattr(module_loss, config['loss'])

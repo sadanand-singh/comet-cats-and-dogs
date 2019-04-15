@@ -1,33 +1,43 @@
 {
-  "name": "MNIST",
+  "name": "CatsVsDogs",
   "n_gpu": 1,
   "comet": false,
   "arch": {
-    "type": "MnistModel",
+    "type": "VGG16BN",
+    "input_shape": [3, 224, 224],
     "args": {}
   },
-  "data_loader": {
-    "type": "MnistDataLoader",
+  "train_data_loader": {
+    "type": "CatsAndDogsDataLoader",
     "args": {
-      "data_dir": "data/",
-      "batch_size": 128,
+      "data_dir": "/data/data/cats-and-dogs/train",
+      "batch_size": 32,
       "shuffle": true,
-      "validation_split": 0.2,
-      "num_workers": 2
+      "validation_split": 0.0,
+      "num_workers": 4
+    }
+  },
+  "val_data_loader": {
+    "type": "CatsAndDogsDataLoader",
+    "args": {
+      "data_dir": "/data/data/cats-and-dogs/test",
+      "batch_size": 32,
+      "shuffle": true,
+      "validation_split": 0.0,
+      "num_workers": 4
     }
   },
   "optimizer": {
-    "type": "Adam",
+    "type": "SGD",
     "args": {
-      "lr": 0.001,
-      "weight_decay": 0.01,
-      "amsgrad": true
+      "lr": 0.01,
+      "weight_decay": 1e-4,
+      "momentum": 0.9
     }
   },
   "loss": "nll_loss",
   "metrics": {
-    "Accuracy": { "name": "acc" },
-    "TopKAccuracy": { "k": 3, "name": "top3-acc" }
+    "Accuracy": { "name": "acc" }
   },
   "lr_scheduler": {
     "type": "StepLR",
