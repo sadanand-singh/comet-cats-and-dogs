@@ -1,7 +1,7 @@
 {
   "name": "CatsVsDogs",
   "n_gpu": 1,
-  "comet": false,
+  "comet": true,
   "arch": {
     "type": "VGG16BN",
     "input_shape": [3, 224, 224],
@@ -11,7 +11,7 @@
     "type": "CatsAndDogsDataLoader",
     "args": {
       "data_dir": "/data/data/cats-and-dogs/train",
-      "batch_size": 32,
+      "batch_size": 128,
       "shuffle": true,
       "validation_split": 0.0,
       "num_workers": 4
@@ -21,7 +21,7 @@
     "type": "CatsAndDogsDataLoader",
     "args": {
       "data_dir": "/data/data/cats-and-dogs/test",
-      "batch_size": 32,
+      "batch_size": 256,
       "shuffle": true,
       "validation_split": 0.0,
       "num_workers": 4
@@ -30,7 +30,7 @@
   "optimizer": {
     "type": "SGD",
     "args": {
-      "lr": 0.01,
+      "lr": 0.04,
       "weight_decay": 1e-4,
       "momentum": 0.9
     }
