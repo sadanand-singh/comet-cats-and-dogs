@@ -26,7 +26,7 @@ def main(config, resume):
     model = get_instance(module_arch, 'arch', config)
     model.summary(
         input_size=tuple(config["arch"]["input_shape"]),
-        batch_size=config["data_loader"]["args"]["batch_size"],
+        batch_size=config["train_data_loader"]["args"]["batch_size"],
     )
 
     # get function handles of loss and metrics

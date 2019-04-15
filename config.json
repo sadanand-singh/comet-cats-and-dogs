@@ -35,7 +35,7 @@
       "momentum": 0.9
     }
   },
-  "loss": "nll_loss",
+  "loss": "cross_entropy",
   "metrics": {
     "Accuracy": { "name": "acc" }
   },
