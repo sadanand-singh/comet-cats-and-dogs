@@ -17,7 +17,9 @@ class CatsAndDogsDataLoader(BaseDataLoader):
                 ]
             )
         else:
-            tfs = transforms.Compose([transforms.ToTensor(), normalize])
+            tfs = transforms.Compose(
+                [transforms.Resize((224, 224)), transforms.ToTensor(), normalize]
+            )
 
         self.dataset = datasets.ImageFolder(data_dir, tfs)
         super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers)
